@@ -1,7 +1,8 @@
 import { getServerSession } from 'next-auth';
 import { Col, Container, Row } from 'react-bootstrap';
 import { loggedInProtectedPage } from '@/lib/page-protection';
-import authOptions from '@/lib/authOptions'; import { Contact } from '@/lib/validationSchemas';
+import authOptions from '@/lib/authOptions';
+import { Contact } from '@/lib/validationSchemas';
 import ContactCard from '@/components/ContactCard';
 
 /** Render a list of stuff for the logged in user. */
