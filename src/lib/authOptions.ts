@@ -1,10 +1,9 @@
-/* eslint-disable arrow-body-style */
-import { compare } from 'bcrypt';
-import { type NextAuthOptions } from 'next-auth';
+import { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { prisma } from '@/lib/prisma';
+import { compare } from 'bcrypt';
+import { prisma } from '@/lib/prisma'; // adjust this if your prisma client is elsewhere
 
-const authOptions: NextAuthOptions = {
+export const authOptions: AuthOptions = {
   session: {
     strategy: 'jwt',
   },
@@ -23,11 +22,13 @@ const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials.password) {
           return null;
         }
+
         const user = await prisma.user.findUnique({
           where: {
             email: credentials.email,
           },
         });
+
         if (!user) {
           return null;
         }
@@ -40,7 +41,7 @@ const authOptions: NextAuthOptions = {
         return {
           id: `${user.id}`,
           email: user.email,
-          randomKey: user.role,
+          randomKey: user.role, // role: ADMIN or USER
         };
       },
     }),
@@ -48,31 +49,24 @@ const authOptions: NextAuthOptions = {
   pages: {
     signIn: '/auth/signin',
     signOut: '/auth/signout',
-    //   error: '/auth/error',
-    //   verifyRequest: '/auth/verify-request',
-    //   newUser: '/auth/new-user'
   },
   callbacks: {
-    session: ({ session, token }) => {
-      // console.log('Session Callback', { session, token })
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.id,
-          randomKey: token.randomKey,
-        },
-      };
-    },
+    session: ({ session, token }) => ({
+      ...session,
+      user: {
+        ...session.user,
+        id: token.id,
+        randomKey: token.randomKey, // carry the role in session
+      },
+    }),
+    // eslint-disable-next-line no-param-reassign
     jwt: ({ token, user }) => {
-      // console.log('JWT Callback', { token, user })
       if (user) {
         const u = user as unknown as any;
-        return {
-          ...token,
-          id: u.id,
-          randomKey: u.randomKey,
-        };
+        // eslint-disable-next-line no-param-reassign
+        token.id = u.id;
+        // eslint-disable-next-line no-param-reassign
+        token.randomKey = u.randomKey;
       }
       return token;
     },

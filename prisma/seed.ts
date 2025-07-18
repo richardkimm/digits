@@ -8,7 +8,11 @@ async function main() {
   console.log('Seeding the database');
   const password = await hash('changeme', 10);
   config.defaultAccounts.forEach(async (account) => {
-    const role = account.role as Role || Role.USER;
+    let role: Role = 'USER';
+    if (account.role === 'ADMIN') {
+      role = 'ADMIN';
+    }
+
     console.log(`  Creating user: ${account.email} with role: ${role}`);
     await prisma.user.upsert({
       where: { email: account.email },
@@ -21,12 +25,18 @@ async function main() {
     });
     // console.log(`  Created user: ${user.email} with role: ${user.role}`);
   });
-  for (const data of config.defaultData) {
-    const condition = data.condition as Condition || Condition.good;
-    console.log(`  Adding stuff: ${JSON.stringify(data)}`);
-    // eslint-disable-next-line no-await-in-loop
+  config.defaultData.forEach(async (data, index) => {
+    let condition: Condition = 'good';
+    if (data.condition === 'poor') {
+      condition = 'poor';
+    } else if (data.condition === 'excellent') {
+      condition = 'excellent';
+    } else {
+      condition = 'fair';
+    }
+    console.log(`  Adding stuff: ${data.name} (${data.owner})`);
     await prisma.stuff.upsert({
-      where: { id: config.defaultData.indexOf(data) + 1 },
+      where: { id: index },
       update: {},
       create: {
         name: data.name,
@@ -35,8 +45,24 @@ async function main() {
         condition,
       },
     });
-  }
+  });
+  config.defaultContacts.forEach(async (contact, index) => {
+    console.log(`  Adding contact: ${contact.firstName} ${contact.lastName}`);
+    await prisma.contact.upsert({
+      where: { id: index },
+      update: {},
+      create: {
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        address: contact.address,
+        image: contact.image,
+        description: contact.description,
+        owner: contact.owner,
+      },
+    });
+  });
 }
+
 main()
   .then(() => prisma.$disconnect())
   .catch(async (e) => {
