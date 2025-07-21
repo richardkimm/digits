@@ -1,6 +1,6 @@
 <img src="doc/landing.png">
 
-Digits is a Next.js 14 application designed to help manage personal contacts and user roles. This project demonstrates:
+Digits is a Next.js 14 application that is designed to help manage personal contacts and user roles. This project demonstrates:
 
 Landing Page
 Greets the user and provides options to sign in or sign up.
