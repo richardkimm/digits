@@ -34,17 +34,6 @@ async function main() {
     } else {
       condition = 'fair';
     }
-    console.log(`  Adding stuff: ${data.name} (${data.owner})`);
-    await prisma.stuff.upsert({
-      where: { id: index },
-      update: {},
-      create: {
-        name: data.name,
-        quantity: data.quantity,
-        owner: data.owner,
-        condition,
-      },
-    });
   });
   config.defaultContacts.forEach(async (contact, index) => {
     console.log(`  Adding contact: ${contact.firstName} ${contact.lastName}`);
